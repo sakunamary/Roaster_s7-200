@@ -202,6 +202,7 @@ __end:
 
 void PROGRAM0_init__(PROGRAM0 *data__, BOOL retain) {
   __INIT_VAR(data__->RUN_BUTTON,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->STOP_STATUS,__BOOL_LITERAL(FALSE),retain)
   __INIT_VAR(data__->STOP_BUTTON,__BOOL_LITERAL(FALSE),retain)
   __INIT_VAR(data__->BT_IN,0,retain)
   __INIT_VAR(data__->ET_IN,0,retain)
@@ -212,7 +213,8 @@ void PROGRAM0_init__(PROGRAM0 *data__, BOOL retain) {
 void PROGRAM0_body__(PROGRAM0 *data__) {
   // Initialise TEMP variables
 
-  __SET_VAR(data__->,RUN_STATUS,,((__GET_VAR(data__->STOP_BUTTON,) && __GET_VAR(data__->RUN_BUTTON,)) || __GET_VAR(data__->RUN_STATUS,)));
+  __SET_VAR(data__->,STOP_STATUS,,__GET_VAR(data__->STOP_BUTTON,));
+  __SET_VAR(data__->,RUN_STATUS,,(!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->RUN_STATUS,)));
 
   goto __end;
 

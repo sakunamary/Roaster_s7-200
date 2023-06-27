@@ -1,6 +1,11 @@
 PROGRAM program0
   VAR_INPUT
     RUN_BUTTON : BOOL;
+  END_VAR
+  VAR_OUTPUT
+    stop_status : BOOL;
+  END_VAR
+  VAR_INPUT
     STOP_BUTTON : BOOL;
     BT_IN : INT;
     ET_IN : INT;
@@ -9,7 +14,8 @@ PROGRAM program0
     RUN_STATUS : BOOL;
   END_VAR
 
-  RUN_STATUS := STOP_BUTTON AND RUN_BUTTON OR RUN_STATUS;
+  stop_status := STOP_BUTTON;
+  RUN_STATUS := NOT(stop_status) AND RUN_STATUS;
 END_PROGRAM
 
 
