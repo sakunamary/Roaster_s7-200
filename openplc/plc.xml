@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <project xmlns:ns1="http://www.plcopen.org/xml/tc6_0201" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.plcopen.org/xml/tc6_0201">
   <fileHeader companyName="未知" productName="未命名" productVersion="1" creationDateTime="2023-06-26T21:53:33"/>
-  <contentHeader name="未命名" modificationDateTime="2023-06-27T23:10:51">
+  <contentHeader name="未命名" modificationDateTime="2023-07-25T17:46:17">
     <coordinateInfo>
       <fbd>
         <scaling x="10" y="10"/>
@@ -19,49 +19,92 @@
     <pous>
       <pou name="program0" pouType="program">
         <interface>
-          <inputVars>
-            <variable name="RUN_BUTTON">
+          <localVars>
+            <variable name="RUN_BUTTON" address="%IX0.1">
+              <type>
+                <BOOL/>
+              </type>
+              <documentation>
+                <xhtml:p><![CDATA[运行按钮]]></xhtml:p>
+              </documentation>
+            </variable>
+            <variable name="STOP_BUTTON" address="%IX0.2">
               <type>
                 <BOOL/>
               </type>
             </variable>
-          </inputVars>
-          <outputVars>
+            <variable name="heat" address="%IX0.3">
+              <type>
+                <BOOL/>
+              </type>
+            </variable>
+            <variable name="cooling" address="%IX0.4">
+              <type>
+                <BOOL/>
+              </type>
+            </variable>
+          </localVars>
+          <localVars>
             <variable name="stop_status">
               <type>
                 <BOOL/>
               </type>
             </variable>
-          </outputVars>
-          <inputVars>
-            <variable name="STOP_BUTTON">
+          </localVars>
+          <localVars>
+            <variable name="system_out" address="%QX0.0">
               <type>
                 <BOOL/>
               </type>
             </variable>
-            <variable name="BT_IN">
+            <variable name="heat_out" address="%QX0.1">
               <type>
-                <INT/>
+                <BOOL/>
               </type>
             </variable>
-            <variable name="ET_IN">
+            <variable name="cooling_out" address="%QX0.2">
               <type>
-                <INT/>
+                <BOOL/>
               </type>
             </variable>
-          </inputVars>
-          <outputVars>
+          </localVars>
+          <localVars>
             <variable name="RUN_STATUS">
               <type>
                 <BOOL/>
               </type>
             </variable>
-          </outputVars>
+          </localVars>
+          <localVars>
+            <variable name="ET_IN" address="%IW0">
+              <type>
+                <INT/>
+              </type>
+            </variable>
+            <variable name="BT_IN" address="%IW1">
+              <type>
+                <INT/>
+              </type>
+            </variable>
+            <variable name="AT_IN" address="%IW2">
+              <type>
+                <INT/>
+              </type>
+            </variable>
+            <variable name="CH4_in" address="%IW3">
+              <type>
+                <INT/>
+              </type>
+            </variable>
+          </localVars>
           <localVars>
             <variable name="TON0">
               <type>
                 <derived name="TON"/>
               </type>
+              <documentation>
+                <xhtml:p><![CDATA[运行延迟启动计时器]]></xhtml:p>
+              </documentation>
             </variable>
           </localVars>
         </interface>
@@ -88,7 +131,9 @@
                 <relPosition x="0" y="20"/>
                 <connection refLocalId="8">
                   <position x="1030" y="90"/>
-                  <position x="728" y="90"/>
+                  <position x="935" y="90"/>
+                  <position x="935" y="80"/>
+                  <position x="841" y="80"/>
                 </connection>
               </connectionPointIn>
             </rightPowerRail>
@@ -121,11 +166,13 @@
               <variable>RUN_STATUS</variable>
             </contact>
             <coil localId="8" height="20" width="21" negated="false">
-              <position x="708" y="80"/>
+              <position x="820" y="70"/>
               <connectionPointIn>
                 <relPosition x="0" y="10"/>
                 <connection refLocalId="4">
-                  <position x="708" y="90"/>
+                  <position x="820" y="80"/>
+                  <position x="625" y="80"/>
+                  <position x="625" y="90"/>
                   <position x="431" y="90"/>
                 </connection>
               </connectionPointIn>
@@ -237,6 +284,9 @@
             </inVariable>
           </LD>
         </body>
+        <documentation>
+          <xhtml:p><![CDATA[mian]]></xhtml:p>
+        </documentation>
       </pou>
     </pous>
   </types>

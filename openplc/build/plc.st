@@ -93,23 +93,36 @@ END_FUNCTION_BLOCK
 
 
 PROGRAM program0
-  VAR_INPUT
+  VAR
     RUN_BUTTON : BOOL;
+    STOP_BUTTON : BOOL;
+    heat : BOOL;
+    cooling : BOOL;
   END_VAR
-  VAR_OUTPUT
+  VAR
     stop_status : BOOL;
   END_VAR
-  VAR_INPUT
-    STOP_BUTTON : BOOL;
-    BT_IN : INT;
-    ET_IN : INT;
+  VAR
+    system_out : BOOL;
+    heat_out : BOOL;
+    cooling_out : BOOL;
   END_VAR
-  VAR_OUTPUT
+  VAR
     RUN_STATUS : BOOL;
+  END_VAR
+  VAR
+    ET_IN : INT;
+    BT_IN : INT;
+    AT_IN : INT;
+    CH4_in : INT;
+  END_VAR
+  VAR
+    TON0 : TON;
   END_VAR
 
   stop_status := STOP_BUTTON;
   RUN_STATUS := NOT(stop_status) AND RUN_STATUS;
+  TON0(IN := RUN_STATUS, PT := t#2000ms);
 END_PROGRAM
 
 

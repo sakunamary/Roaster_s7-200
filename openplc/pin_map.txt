@@ -1,0 +1,34 @@
+esp32
+Digital In 
+	17, 18, 19, 21, 22, 23, 27, 32 	%IX0.0 每 %IX0.7
+	33				%IX1.0 每 %IX1.0
+Digital Out
+ 	01, 02, 03, 04, 05, 12, 13, 14	%QX0.0 每 %QX0.7
+	15, 16 				%QX1.0 每 %QX1.1
+Analog In 	34, 35, 36, 39 		%IW0 每 %IW3
+Analog Out 	25, 26 			%QW0 每 %QW1
+
+
+
+
+HB200 pin_map
+Modbus RTU  Serial3   RX16 TX17  19200 8N1
+
+Digital IN   
+	run_button	18	%IX0.1
+	e_stop_button	19	%IX0.2
+	heat		21	%IX0.3
+	cooling		22	%IX0.4
+
+Digital OUT  
+	SYSTEM_OUT	01	%QX0.0
+	HEAT_OUT	02	%QX0.1
+	COOLING_OUT	03	%QX0.2
+
+Analog IN 
+	CH1_in		34	%IW0
+	CH2_in		35	%IW1
+	CH3_in		36	%IW2
+	CH4_in		39	%IW3
+
+		

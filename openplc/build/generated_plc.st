@@ -1,21 +1,34 @@
 PROGRAM program0
-  VAR_INPUT
-    RUN_BUTTON : BOOL;
+  VAR
+    RUN_BUTTON AT %IX0.1 : BOOL;
+    STOP_BUTTON AT %IX0.2 : BOOL;
+    heat AT %IX0.3 : BOOL;
+    cooling AT %IX0.4 : BOOL;
   END_VAR
-  VAR_OUTPUT
+  VAR
     stop_status : BOOL;
   END_VAR
-  VAR_INPUT
-    STOP_BUTTON : BOOL;
-    BT_IN : INT;
-    ET_IN : INT;
+  VAR
+    system_out AT %QX0.0 : BOOL;
+    heat_out AT %QX0.1 : BOOL;
+    cooling_out AT %QX0.2 : BOOL;
   END_VAR
-  VAR_OUTPUT
+  VAR
     RUN_STATUS : BOOL;
+  END_VAR
+  VAR
+    ET_IN AT %IW0 : INT;
+    BT_IN AT %IW1 : INT;
+    AT_IN AT %IW2 : INT;
+    CH4_in AT %IW3 : INT;
+  END_VAR
+  VAR
+    TON0 : TON;
   END_VAR
 
   stop_status := STOP_BUTTON;
   RUN_STATUS := NOT(stop_status) AND RUN_STATUS;
+  TON0(IN := RUN_STATUS, PT := t#2000ms);
 END_PROGRAM
 
 

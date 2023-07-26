@@ -202,11 +202,19 @@ __end:
 
 void PROGRAM0_init__(PROGRAM0 *data__, BOOL retain) {
   __INIT_VAR(data__->RUN_BUTTON,__BOOL_LITERAL(FALSE),retain)
-  __INIT_VAR(data__->STOP_STATUS,__BOOL_LITERAL(FALSE),retain)
   __INIT_VAR(data__->STOP_BUTTON,__BOOL_LITERAL(FALSE),retain)
-  __INIT_VAR(data__->BT_IN,0,retain)
-  __INIT_VAR(data__->ET_IN,0,retain)
+  __INIT_VAR(data__->HEAT,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->COOLING,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->STOP_STATUS,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->SYSTEM_OUT,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->HEAT_OUT,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->COOLING_OUT,__BOOL_LITERAL(FALSE),retain)
   __INIT_VAR(data__->RUN_STATUS,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->ET_IN,0,retain)
+  __INIT_VAR(data__->BT_IN,0,retain)
+  __INIT_VAR(data__->AT_IN,0,retain)
+  __INIT_VAR(data__->CH4_IN,0,retain)
+  TON_init__(&data__->TON0,retain);
 }
 
 // Code part
@@ -215,6 +223,9 @@ void PROGRAM0_body__(PROGRAM0 *data__) {
 
   __SET_VAR(data__->,STOP_STATUS,,__GET_VAR(data__->STOP_BUTTON,));
   __SET_VAR(data__->,RUN_STATUS,,(!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->RUN_STATUS,)));
+  __SET_VAR(data__->TON0.,IN,,__GET_VAR(data__->RUN_STATUS,));
+  __SET_VAR(data__->TON0.,PT,,__time_to_timespec(1, 2000, 0, 0, 0, 0));
+  TON_body__(&data__->TON0);
 
   goto __end;
 
