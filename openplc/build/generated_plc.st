@@ -29,6 +29,9 @@ PROGRAM program0
   stop_status := STOP_BUTTON;
   RUN_STATUS := NOT(stop_status) AND RUN_STATUS;
   TON0(IN := RUN_STATUS, PT := t#2000ms);
+  system_out := TON0.Q;
+  cooling_out := cooling AND RUN_STATUS;
+  heat_out := heat AND RUN_STATUS;
 END_PROGRAM
 
 

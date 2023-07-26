@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <project xmlns:ns1="http://www.plcopen.org/xml/tc6_0201" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.plcopen.org/xml/tc6_0201">
   <fileHeader companyName="未知" productName="未命名" productVersion="1" creationDateTime="2023-06-26T21:53:33"/>
-  <contentHeader name="未命名" modificationDateTime="2023-07-25T17:46:17">
+  <contentHeader name="未命名" modificationDateTime="2023-07-26T10:04:28">
     <coordinateInfo>
       <fbd>
         <scaling x="10" y="10"/>
@@ -126,14 +126,12 @@
               </connectionPointOut>
             </leftPowerRail>
             <rightPowerRail localId="3" height="40" width="10">
-              <position x="1030" y="70"/>
+              <position x="1050" y="70"/>
               <connectionPointIn>
                 <relPosition x="0" y="20"/>
                 <connection refLocalId="8">
-                  <position x="1030" y="90"/>
-                  <position x="935" y="90"/>
-                  <position x="935" y="80"/>
-                  <position x="841" y="80"/>
+                  <position x="1050" y="90"/>
+                  <position x="831" y="90"/>
                 </connection>
               </connectionPointIn>
             </rightPowerRail>
@@ -166,13 +164,11 @@
               <variable>RUN_STATUS</variable>
             </contact>
             <coil localId="8" height="20" width="21" negated="false">
-              <position x="820" y="70"/>
+              <position x="810" y="80"/>
               <connectionPointIn>
                 <relPosition x="0" y="10"/>
                 <connection refLocalId="4">
-                  <position x="820" y="80"/>
-                  <position x="625" y="80"/>
-                  <position x="625" y="90"/>
+                  <position x="810" y="90"/>
                   <position x="431" y="90"/>
                 </connection>
               </connectionPointIn>
@@ -196,12 +192,12 @@
               <variable>stop_status</variable>
             </contact>
             <rightPowerRail localId="11" height="40" width="10">
-              <position x="1030" y="110"/>
+              <position x="1050" y="110"/>
               <connectionPointIn>
                 <relPosition x="0" y="20"/>
                 <connection refLocalId="12">
-                  <position x="1030" y="130"/>
-                  <position x="980" y="130"/>
+                  <position x="1050" y="130"/>
+                  <position x="981" y="130"/>
                 </connection>
               </connectionPointIn>
             </rightPowerRail>
@@ -219,8 +215,8 @@
               </connectionPointOut>
               <variable>RUN_STATUS</variable>
             </coil>
-            <comment localId="13" height="40" width="80">
-              <position x="200" y="80"/>
+            <comment localId="13" height="40" width="130">
+              <position x="150" y="80"/>
               <content>
                 <xhtml:p><![CDATA[启动/急停]]></xhtml:p>
               </content>
@@ -240,13 +236,13 @@
               <variable>RUN_STATUS</variable>
             </contact>
             <block localId="16" typeName="TON" instanceName="TON0" height="150" width="110">
-              <position x="560" y="160"/>
+              <position x="610" y="160"/>
               <inputVariables>
                 <variable formalParameter="IN">
                   <connectionPointIn>
                     <relPosition x="0" y="50"/>
                     <connection refLocalId="15">
-                      <position x="560" y="210"/>
+                      <position x="610" y="210"/>
                       <position x="469" y="210"/>
                     </connection>
                   </connectionPointIn>
@@ -255,7 +251,7 @@
                   <connectionPointIn>
                     <relPosition x="0" y="120"/>
                     <connection refLocalId="17">
-                      <position x="560" y="280"/>
+                      <position x="610" y="280"/>
                       <position x="530" y="280"/>
                     </connection>
                   </connectionPointIn>
@@ -282,6 +278,146 @@
               </connectionPointOut>
               <expression>t#2000ms</expression>
             </inVariable>
+            <leftPowerRail localId="18" height="80" width="10">
+              <position x="300" y="400"/>
+              <connectionPointOut formalParameter="">
+                <relPosition x="10" y="20"/>
+              </connectionPointOut>
+              <connectionPointOut formalParameter="">
+                <relPosition x="10" y="60"/>
+              </connectionPointOut>
+            </leftPowerRail>
+            <contact localId="19" height="20" width="21" negated="false">
+              <position x="670" y="410"/>
+              <connectionPointIn>
+                <relPosition x="0" y="10"/>
+                <connection refLocalId="27">
+                  <position x="670" y="420"/>
+                  <position x="441" y="420"/>
+                </connection>
+              </connectionPointIn>
+              <connectionPointOut>
+                <relPosition x="21" y="10"/>
+              </connectionPointOut>
+              <variable>cooling</variable>
+            </contact>
+            <contact localId="20" height="20" width="21" negated="false">
+              <position x="670" y="450"/>
+              <connectionPointIn>
+                <relPosition x="0" y="10"/>
+                <connection refLocalId="2">
+                  <position x="670" y="460"/>
+                  <position x="441" y="460"/>
+                </connection>
+              </connectionPointIn>
+              <connectionPointOut>
+                <relPosition x="21" y="10"/>
+              </connectionPointOut>
+              <variable>heat</variable>
+            </contact>
+            <rightPowerRail localId="21" height="80" width="10">
+              <position x="1050" y="400"/>
+              <connectionPointIn>
+                <relPosition x="0" y="20"/>
+                <connection refLocalId="22">
+                  <position x="1050" y="420"/>
+                  <position x="880" y="420"/>
+                </connection>
+              </connectionPointIn>
+              <connectionPointIn>
+                <relPosition x="0" y="60"/>
+                <connection refLocalId="24">
+                  <position x="1050" y="460"/>
+                  <position x="878" y="460"/>
+                </connection>
+              </connectionPointIn>
+            </rightPowerRail>
+            <coil localId="22" height="20" width="21" negated="false">
+              <position x="860" y="410"/>
+              <connectionPointIn>
+                <relPosition x="0" y="10"/>
+                <connection refLocalId="19">
+                  <position x="860" y="420"/>
+                  <position x="691" y="420"/>
+                </connection>
+              </connectionPointIn>
+              <connectionPointOut>
+                <relPosition x="21" y="10"/>
+              </connectionPointOut>
+              <variable>cooling_out</variable>
+            </coil>
+            <coil localId="24" height="20" width="21" negated="false">
+              <position x="858" y="450"/>
+              <connectionPointIn>
+                <relPosition x="0" y="10"/>
+                <connection refLocalId="20">
+                  <position x="858" y="460"/>
+                  <position x="691" y="460"/>
+                </connection>
+              </connectionPointIn>
+              <connectionPointOut>
+                <relPosition x="21" y="10"/>
+              </connectionPointOut>
+              <variable>heat_out</variable>
+            </coil>
+            <coil localId="25" height="20" width="21" negated="false">
+              <position x="960" y="200"/>
+              <connectionPointIn>
+                <relPosition x="0" y="10"/>
+                <connection refLocalId="16" formalParameter="Q">
+                  <position x="960" y="210"/>
+                  <position x="720" y="210"/>
+                </connection>
+              </connectionPointIn>
+              <connectionPointOut>
+                <relPosition x="21" y="10"/>
+              </connectionPointOut>
+              <variable>system_out</variable>
+            </coil>
+            <rightPowerRail localId="26" height="40" width="10">
+              <position x="1048" y="190"/>
+              <connectionPointIn>
+                <relPosition x="0" y="20"/>
+                <connection refLocalId="25">
+                  <position x="1048" y="210"/>
+                  <position x="980" y="210"/>
+                </connection>
+              </connectionPointIn>
+            </rightPowerRail>
+            <contact localId="27" height="20" width="21" negated="false">
+              <position x="420" y="410"/>
+              <connectionPointIn>
+                <relPosition x="0" y="10"/>
+                <connection refLocalId="18">
+                  <position x="420" y="420"/>
+                  <position x="310" y="420"/>
+                </connection>
+              </connectionPointIn>
+              <connectionPointOut>
+                <relPosition x="21" y="10"/>
+              </connectionPointOut>
+              <variable>RUN_STATUS</variable>
+            </contact>
+            <contact localId="2" height="20" width="21" negated="false" executionOrderId="0">
+              <position x="420" y="450"/>
+              <connectionPointIn>
+                <relPosition x="0" y="10"/>
+                <connection refLocalId="18">
+                  <position x="420" y="460"/>
+                  <position x="310" y="460"/>
+                </connection>
+              </connectionPointIn>
+              <connectionPointOut>
+                <relPosition x="21" y="10"/>
+              </connectionPointOut>
+              <variable>RUN_STATUS</variable>
+            </contact>
+            <comment localId="28" height="40" width="100">
+              <position x="160" y="420"/>
+              <content>
+                <xhtml:p><![CDATA[控制按钮]]></xhtml:p>
+              </content>
+            </comment>
           </LD>
         </body>
         <documentation>

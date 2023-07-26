@@ -226,6 +226,9 @@ void PROGRAM0_body__(PROGRAM0 *data__) {
   __SET_VAR(data__->TON0.,IN,,__GET_VAR(data__->RUN_STATUS,));
   __SET_VAR(data__->TON0.,PT,,__time_to_timespec(1, 2000, 0, 0, 0, 0));
   TON_body__(&data__->TON0);
+  __SET_VAR(data__->,SYSTEM_OUT,,__GET_VAR(data__->TON0.Q,));
+  __SET_VAR(data__->,COOLING_OUT,,(__GET_VAR(data__->COOLING,) && __GET_VAR(data__->RUN_STATUS,)));
+  __SET_VAR(data__->,HEAT_OUT,,(__GET_VAR(data__->HEAT,) && __GET_VAR(data__->RUN_STATUS,)));
 
   goto __end;
 
