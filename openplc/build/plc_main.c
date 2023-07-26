@@ -97,198 +97,184 @@ void PLC_SetTimer(unsigned long long next, unsigned long long period);
 
 
 /**
- * Win32 specific code
+ * Linux specific code
  **/
 
 #include <stdio.h>
-#include <sys/timeb.h>
+#include <string.h>
 #include <time.h>
-#include <windows.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <pthread.h>
 #include <locale.h>
+#include <semaphore.h>
 
+static sem_t Run_PLC;
 
-long AtomicCompareExchange(long* atomicvar, long compared, long exchange)
+long AtomicCompareExchange(long* atomicvar,long compared, long exchange)
 {
-    return InterlockedCompareExchange(atomicvar, exchange, compared);
+    return __sync_val_compare_and_swap(atomicvar, compared, exchange);
 }
-CRITICAL_SECTION Atomic64CS; 
 long long AtomicCompareExchange64(long long* atomicvar, long long compared, long long exchange)
 {
-    long long res;
-    EnterCriticalSection(&Atomic64CS);
-    res=*atomicvar;
-    if(*atomicvar == compared){
-        *atomicvar = exchange;
-    }
-    LeaveCriticalSection(&Atomic64CS);
-    return res;
+    return __sync_val_compare_and_swap(atomicvar, compared, exchange);
 }
 
-struct timeb timetmp;
 void PLC_GetTime(IEC_TIME *CURRENT_TIME)
 {
-	ftime(&timetmp);
-
-	(*CURRENT_TIME).tv_sec = timetmp.time;
-	(*CURRENT_TIME).tv_nsec = timetmp.millitm * 1000000;
+    struct timespec tmp;
+    clock_gettime(CLOCK_REALTIME, &tmp);
+    CURRENT_TIME->tv_sec = tmp.tv_sec;
+    CURRENT_TIME->tv_nsec = tmp.tv_nsec;
 }
 
-void PLC_timer_notify()
+void PLC_timer_notify(sigval_t val)
 {
     PLC_GetTime(&__CURRENT_TIME);
-    __run();
+    sem_post(&Run_PLC);
 }
 
-HANDLE PLC_timer = NULL;
+timer_t PLC_timer;
+
 void PLC_SetTimer(unsigned long long next, unsigned long long period)
 {
-	LARGE_INTEGER liDueTime;
-	/* arg 2 of SetWaitableTimer take 100 ns interval*/
-	liDueTime.QuadPart =  next / (-100);
-
-	if (!SetWaitableTimer(PLC_timer, &liDueTime, period<1000000?1:period/1000000, NULL, NULL, 0))
-    {
-        printf("SetWaitableTimer failed (%d)\n", GetLastError());
-    }
+    struct itimerspec timerValues;
+	/*
+	printf("SetTimer(%lld,%lld)\n",next, period);
+	*/
+    memset (&timerValues, 0, sizeof (struct itimerspec));
+	{
+#ifdef __lldiv_t_defined
+		lldiv_t nxt_div = lldiv(next, 1000000000);
+		lldiv_t period_div = lldiv(period, 1000000000);
+	    timerValues.it_value.tv_sec = nxt_div.quot;
+	    timerValues.it_value.tv_nsec = nxt_div.rem;
+	    timerValues.it_interval.tv_sec = period_div.quot;
+	    timerValues.it_interval.tv_nsec = period_div.rem;
+#else
+	    timerValues.it_value.tv_sec = next / 1000000000;
+	    timerValues.it_value.tv_nsec = next % 1000000000;
+	    timerValues.it_interval.tv_sec = period / 1000000000;
+	    timerValues.it_interval.tv_nsec = period % 1000000000;
+#endif
+	}
+    timer_settime (PLC_timer, 0, &timerValues, NULL);
+}
+//
+void catch_signal(int sig)
+{
+//  signal(SIGTERM, catch_signal);
+  signal(SIGINT, catch_signal);
+  printf("Got Signal %d\n",sig);
+  exit(0);
 }
 
-int PLC_shutdown;
+
+static unsigned long __debug_tick;
+
+pthread_t PLC_thread;
+static pthread_mutex_t python_wait_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t python_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t debug_wait_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t debug_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+int PLC_shutdown = 0;
 
 int ForceSaveRetainReq(void) {
     return PLC_shutdown;
 }
 
-/* Variable used to stop plcloop thread */
-void PlcLoop()
+void PLC_thread_proc(void *arg)
 {
-    PLC_shutdown = 0;
-    while(!PLC_shutdown) {
-        if (WaitForSingleObject(PLC_timer, INFINITE) != WAIT_OBJECT_0)
-            PLC_shutdown = 1;
-        PLC_timer_notify();
+    while (!PLC_shutdown) {
+        sem_wait(&Run_PLC);
+        __run();
     }
+    pthread_exit(0);
 }
-
-HANDLE PLC_thread;
-HANDLE debug_sem;
-HANDLE debug_wait_sem;
-HANDLE python_sem;
-HANDLE python_wait_sem;
 
 #define maxval(a,b) ((a>b)?a:b)
 int startPLC(int argc,char **argv)
 {
-	unsigned long thread_id = 0;
-    BOOL tmp;
+    struct sigevent sigev;
     setlocale(LC_NUMERIC, "C");
 
-    debug_sem = CreateSemaphore(
-                            NULL,           // default security attributes
-                            1,  			// initial count
-                            1,  			// maximum count
-                            NULL);          // unnamed semaphore
-    if (debug_sem == NULL)
-    {
-        printf("startPLC CreateSemaphore debug_sem error: %d\n", GetLastError());
-        return 1;
-    }
+    PLC_shutdown = 0;
 
-    debug_wait_sem = CreateSemaphore(
-                            NULL,           // default security attributes
-                            0,  			// initial count
-                            1,  			// maximum count
-                            NULL);          // unnamed semaphore
+    sem_init(&Run_PLC, 0, 0);
 
-    if (debug_wait_sem == NULL)
-    {
-        printf("startPLC CreateSemaphore debug_wait_sem error: %d\n", GetLastError());
-        return 1;
-    }
+    pthread_create(&PLC_thread, NULL, (void*) &PLC_thread_proc, NULL);
 
-    python_sem = CreateSemaphore(
-                            NULL,           // default security attributes
-                            1,  			// initial count
-                            1,  			// maximum count
-                            NULL);          // unnamed semaphore
+    memset (&sigev, 0, sizeof (struct sigevent));
+    sigev.sigev_value.sival_int = 0;
+    sigev.sigev_notify = SIGEV_THREAD;
+    sigev.sigev_notify_attributes = NULL;
+    sigev.sigev_notify_function = PLC_timer_notify;
 
-    if (python_sem == NULL)
-    {
-        printf("startPLC CreateSemaphore python_sem error: %d\n", GetLastError());
-        return 1;
-    }
-    python_wait_sem = CreateSemaphore(
-                            NULL,           // default security attributes
-                            0,  			// initial count
-                            1,  			// maximum count
-                            NULL);          // unnamed semaphore
+    pthread_mutex_init(&debug_wait_mutex, NULL);
+    pthread_mutex_init(&debug_mutex, NULL);
+    pthread_mutex_init(&python_wait_mutex, NULL);
+    pthread_mutex_init(&python_mutex, NULL);
 
+    pthread_mutex_lock(&debug_wait_mutex);
+    pthread_mutex_lock(&python_wait_mutex);
 
-    if (python_wait_sem == NULL)
-    {
-        printf("startPLC CreateSemaphore python_wait_sem error: %d\n", GetLastError());
-        return 1;
-    }
-
-
-    /* Create a waitable timer */
-    timeBeginPeriod(1);
-    PLC_timer = CreateWaitableTimer(NULL, FALSE, "WaitableTimer");
-    if(NULL == PLC_timer)
-    {
-        printf("CreateWaitableTimer failed (%d)\n", GetLastError());
-        return 1;
-    }
-    if( __init(argc,argv) == 0 )
-    {
+    timer_create (CLOCK_MONOTONIC, &sigev, &PLC_timer);
+    if(  __init(argc,argv) == 0 ){
         PLC_SetTimer(common_ticktime__,common_ticktime__);
-        PLC_thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)PlcLoop, NULL, 0, &thread_id);
-    }
-    else{
+
+        /* install signal handler for manual break */
+        signal(SIGINT, catch_signal);
+    }else{
         return 1;
     }
     return 0;
 }
-static unsigned long __debug_tick;
 
 int TryEnterDebugSection(void)
 {
-	//printf("TryEnterDebugSection\n");
-    if(WaitForSingleObject(debug_sem, 0) == WAIT_OBJECT_0){
+    if (pthread_mutex_trylock(&debug_mutex) == 0){
         /* Only enter if debug active */
         if(__DEBUG){
             return 1;
         }
-        ReleaseSemaphore(debug_sem, 1, NULL);
+        pthread_mutex_unlock(&debug_mutex);
     }
     return 0;
 }
 
 void LeaveDebugSection(void)
 {
-	ReleaseSemaphore(debug_sem, 1, NULL);
-    //printf("LeaveDebugSection\n");
+    pthread_mutex_unlock(&debug_mutex);
 }
 
 int stopPLC()
 {
-    CloseHandle(PLC_timer);
-    WaitForSingleObject(PLC_thread, INFINITE);
+    /* Stop the PLC */
+    PLC_shutdown = 1;
+    sem_post(&Run_PLC);
+    PLC_SetTimer(0,0);
+	pthread_join(PLC_thread, NULL);
+	sem_destroy(&Run_PLC);
+    timer_delete (PLC_timer);
     __cleanup();
-    CloseHandle(debug_wait_sem);
-    CloseHandle(debug_sem);
-    CloseHandle(python_wait_sem);
-    CloseHandle(python_sem);
-    CloseHandle(PLC_thread);
+    pthread_mutex_destroy(&debug_wait_mutex);
+    pthread_mutex_destroy(&debug_mutex);
+    pthread_mutex_destroy(&python_wait_mutex);
+    pthread_mutex_destroy(&python_mutex);
+    return 0;
 }
 
-/* from plc_debugger.c */
+extern unsigned long __tick;
+
 int WaitDebugData(unsigned long *tick)
 {
-	DWORD res;
-	res = WaitForSingleObject(debug_wait_sem, INFINITE);
-    *tick = __debug_tick;
+    int res;
+    if (PLC_shutdown) return 1;
     /* Wait signal from PLC thread */
-	return res != WAIT_OBJECT_0;
+    res = pthread_mutex_lock(&debug_wait_mutex);
+    *tick = __debug_tick;
+    return res;
 }
 
 /* Called by PLC thread when debug_publish finished
@@ -298,70 +284,59 @@ void InitiateDebugTransfer()
     /* remember tick */
     __debug_tick = __tick;
     /* signal debugger thread it can read data */
-    ReleaseSemaphore(debug_wait_sem, 1, NULL);
+    pthread_mutex_unlock(&debug_wait_mutex);
 }
 
 int suspendDebug(int disable)
 {
     /* Prevent PLC to enter debug code */
-    WaitForSingleObject(debug_sem, INFINITE);
+    pthread_mutex_lock(&debug_mutex);
+    /*__DEBUG is protected by this mutex */
     __DEBUG = !disable;
-    if(disable)
-        ReleaseSemaphore(debug_sem, 1, NULL);
+    if (disable)
+    	pthread_mutex_unlock(&debug_mutex);
     return 0;
 }
 
-void resumeDebug()
+void resumeDebug(void)
 {
-	__DEBUG = 1;
+    __DEBUG = 1;
     /* Let PLC enter debug code */
-	ReleaseSemaphore(debug_sem, 1, NULL);
+    pthread_mutex_unlock(&debug_mutex);
 }
 
 /* from plc_python.c */
 int WaitPythonCommands(void)
 {
     /* Wait signal from PLC thread */
-	return WaitForSingleObject(python_wait_sem, INFINITE);
+    return pthread_mutex_lock(&python_wait_mutex);
 }
 
 /* Called by PLC thread on each new python command*/
 void UnBlockPythonCommands(void)
 {
-    /* signal debugger thread it can read data */
-	ReleaseSemaphore(python_wait_sem, 1, NULL);
+    /* signal python thread it can read data */
+    pthread_mutex_unlock(&python_wait_mutex);
 }
 
 int TryLockPython(void)
 {
-	return WaitForSingleObject(python_sem, 0) == WAIT_OBJECT_0;
+    return pthread_mutex_trylock(&python_mutex) == 0;
 }
 
 void UnLockPython(void)
 {
-	ReleaseSemaphore(python_sem, 1, NULL);
+    pthread_mutex_unlock(&python_mutex);
 }
 
 void LockPython(void)
 {
-	WaitForSingleObject(python_sem, INFINITE);
-}
-
-static void __attribute__((constructor))
-beremiz_dll_init(void)
-{
-    InitializeCriticalSection(&Atomic64CS);
-
-}
-
-static void __attribute__((destructor))
-beremiz_dll_destroy(void)
-{
-    DeleteCriticalSection(&Atomic64CS);
+    pthread_mutex_lock(&python_mutex);
 }
 
 struct RT_to_nRT_signal_s {
-    HANDLE sem;
+    pthread_cond_t WakeCond;
+    pthread_mutex_t WakeCondLock;
 };
 
 typedef struct RT_to_nRT_signal_s RT_to_nRT_signal_t;
@@ -380,19 +355,8 @@ void *create_RT_to_nRT_signal(char* name){
     if(!sig) 
     	_LogAndReturnNull("Failed allocating memory for RT_to_nRT signal");
 
-    sig->sem = CreateSemaphore(
-                            NULL,           // default security attributes
-                            1,  			// initial count
-                            1,  			// maximum count
-                            NULL);          // unnamed semaphore
-
-    if(sig->sem == NULL)
-    {
-    	char mstr[256];
-        snprintf(mstr, 255, "startPLC CreateSemaphore %s error: %d\n", name, GetLastError());
-        LogMessage(LOG_CRITICAL, mstr, strlen(mstr));
-        return NULL;
-    }
+    pthread_cond_init(&sig->WakeCond, NULL);
+    pthread_mutex_init(&sig->WakeCondLock, NULL);
 
     return (void*)sig;
 }
@@ -400,7 +364,8 @@ void *create_RT_to_nRT_signal(char* name){
 void delete_RT_to_nRT_signal(void* handle){
     RT_to_nRT_signal_t *sig = (RT_to_nRT_signal_t*)handle;
 
-    CloseHandle(python_sem);
+    pthread_cond_destroy(&sig->WakeCond);
+    pthread_mutex_destroy(&sig->WakeCondLock);
 
     free(sig);
 }
@@ -408,18 +373,20 @@ void delete_RT_to_nRT_signal(void* handle){
 int wait_RT_to_nRT_signal(void* handle){
     int ret;
     RT_to_nRT_signal_t *sig = (RT_to_nRT_signal_t*)handle;
-	return WaitForSingleObject(sig->sem, INFINITE);
+    pthread_mutex_lock(&sig->WakeCondLock);
+    ret = pthread_cond_wait(&sig->WakeCond, &sig->WakeCondLock);
+    pthread_mutex_unlock(&sig->WakeCondLock);
+    return ret;
 }
 
 int unblock_RT_to_nRT_signal(void* handle){
     RT_to_nRT_signal_t *sig = (RT_to_nRT_signal_t*)handle;
-	return ReleaseSemaphore(sig->sem, 1, NULL);
+    return pthread_cond_signal(&sig->WakeCond);
 }
 
 void nRT_reschedule(void){
-    SwitchToThread();
+    sched_yield();
 }
-
 
 /*
   This file is part of Beremiz, a Integrated Development Environment for
@@ -518,7 +485,7 @@ int CheckFileCRC(FILE* file_buffer)
 
 	while(!feof(file_buffer)){
 		if (fread(&data_block, sizeof(data_block), 1, file_buffer))
-			calc_crc32 = GenerateCRC32Sum(&data_block, sizeof(data_block), calc_crc32);
+			calc_crc32 = GenerateCRC32Sum(&data_block, sizeof(char), calc_crc32);
 	}
 
 	/* Compare crc result with a magic number.  */
@@ -528,20 +495,20 @@ int CheckFileCRC(FILE* file_buffer)
 /* Compare current hash with hash from file byte by byte.  */
 int CheckFilehash(void)
 {
-	unsigned int k;
+	int k,ret;
 	int offset = sizeof(retain_info.retain_size);
 
 	rewind(retain_buffer);
 	fseek(retain_buffer, offset , SEEK_SET);
 
 	uint32_t size;
-	fread(&size, sizeof(size), 1, retain_buffer);
+	ret = fread(&size, sizeof(size), 1, retain_buffer);
 	if (size != retain_info.hash_size)
 		return 0;
 
 	for(k = 0; k < retain_info.hash_size; k++){
 		uint8_t file_digit;
-		fread(&file_digit, sizeof(file_digit), 1, retain_buffer);
+		ret = fread(&file_digit, sizeof(char), 1, retain_buffer);
 		if (file_digit != *(retain_info.hash+k))
 			return 0;
 	}
@@ -551,7 +518,7 @@ int CheckFilehash(void)
 
 void InitRetain(void)
 {
-	unsigned int i;
+	int i;
 
 	/* Get retain size in bytes */
 	retain_info.retain_size = GetRetainSize();
@@ -685,7 +652,7 @@ void ValidateRetainBuffer(void)
 
 	/* Add retain data CRC to the end of buffer file.  */
 	fseek(retain_buffer, 0, SEEK_END);
-	fwrite(&retain_crc, sizeof(retain_crc), 1, retain_buffer);
+	fwrite(&retain_crc, sizeof(uint32_t), 1, retain_buffer);
 
 	/* Sync file buffer and close file.  */
 #ifdef __WIN32
@@ -740,9 +707,10 @@ void Retain(unsigned int offset, unsigned int count, void *p)
 
 void Remind(unsigned int offset, unsigned int count, void *p)
 {
+    int ret;
 	/* Remind variable from file.  */
 	fseek(retain_buffer, retain_info.header_offset+offset, SEEK_SET);
-	fread((void *)p, count, 1, retain_buffer);
+	ret = fread((void *)p, count, 1, retain_buffer);
 }
 #endif // !HAVE_RETAIN
 /**
