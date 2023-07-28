@@ -203,18 +203,32 @@ __end:
 void PROGRAM0_init__(PROGRAM0 *data__, BOOL retain) {
   __INIT_VAR(data__->RUN_BUTTON,__BOOL_LITERAL(FALSE),retain)
   __INIT_VAR(data__->STOP_BUTTON,__BOOL_LITERAL(FALSE),retain)
-  __INIT_VAR(data__->HEAT,__BOOL_LITERAL(FALSE),retain)
-  __INIT_VAR(data__->COOLING,__BOOL_LITERAL(FALSE),retain)
-  __INIT_VAR(data__->STOP_STATUS,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->HEAT_BUTTON,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->COOLING_BUTTON,__BOOL_LITERAL(FALSE),retain)
   __INIT_VAR(data__->SYSTEM_OUT,__BOOL_LITERAL(FALSE),retain)
   __INIT_VAR(data__->HEAT_OUT,__BOOL_LITERAL(FALSE),retain)
   __INIT_VAR(data__->COOLING_OUT,__BOOL_LITERAL(FALSE),retain)
-  __INIT_VAR(data__->RUN_STATUS,__BOOL_LITERAL(FALSE),retain)
   __INIT_VAR(data__->ET_IN,0,retain)
   __INIT_VAR(data__->BT_IN,0,retain)
   __INIT_VAR(data__->AT_IN,0,retain)
-  __INIT_VAR(data__->CH4_IN,0,retain)
   TON_init__(&data__->TON0,retain);
+  __INIT_VAR(data__->ARTISAN_BT,0,retain)
+  __INIT_VAR(data__->ARTISAN_ET,0,retain)
+  __INIT_VAR(data__->ARTISAN_AT,0,retain)
+  __INIT_VAR(data__->SYS_RUN,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->STOP_STATUS,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->COOL_RUN,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->HEAT_RUN,__BOOL_LITERAL(FALSE),retain)
+  __INIT_VAR(data__->RUN_STATUS,__BOOL_LITERAL(FALSE),retain)
+  R_TRIG_init__(&data__->R_TRIG1,retain);
+  R_TRIG_init__(&data__->R_TRIG2,retain);
+  F_TRIG_init__(&data__->F_TRIG1,retain);
+  R_TRIG_init__(&data__->R_TRIG3,retain);
+  R_TRIG_init__(&data__->R_TRIG4,retain);
+  F_TRIG_init__(&data__->F_TRIG2,retain);
+  R_TRIG_init__(&data__->R_TRIG5,retain);
+  R_TRIG_init__(&data__->R_TRIG6,retain);
+  F_TRIG_init__(&data__->F_TRIG3,retain);
 }
 
 // Code part
@@ -222,13 +236,43 @@ void PROGRAM0_body__(PROGRAM0 *data__) {
   // Initialise TEMP variables
 
   __SET_VAR(data__->,STOP_STATUS,,__GET_VAR(data__->STOP_BUTTON,));
-  __SET_VAR(data__->,RUN_STATUS,,(!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->RUN_STATUS,)));
+  __SET_VAR(data__->R_TRIG1.,CLK,,__GET_VAR(data__->RUN_BUTTON,));
+  R_TRIG_body__(&data__->R_TRIG1);
+  __SET_VAR(data__->,SYS_RUN,,((!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->RUN_STATUS,)) && __GET_VAR(data__->R_TRIG1.Q,)));
+  __SET_VAR(data__->R_TRIG2.,CLK,,__GET_VAR(data__->RUN_BUTTON,));
+  R_TRIG_body__(&data__->R_TRIG2);
+  __SET_VAR(data__->,RUN_STATUS,,(!(__GET_VAR(data__->SYS_RUN,)) && ((!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->RUN_STATUS,)) || (!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->R_TRIG2.Q,)))));
+  __SET_VAR(data__->F_TRIG1.,CLK,,__GET_VAR(data__->RUN_BUTTON,));
+  F_TRIG_body__(&data__->F_TRIG1);
+  if (__GET_VAR(data__->F_TRIG1.Q,)) {
+    __SET_VAR(data__->,SYS_RUN,,__BOOL_LITERAL(FALSE));
+  };
   __SET_VAR(data__->TON0.,IN,,__GET_VAR(data__->RUN_STATUS,));
   __SET_VAR(data__->TON0.,PT,,__time_to_timespec(1, 2000, 0, 0, 0, 0));
   TON_body__(&data__->TON0);
   __SET_VAR(data__->,SYSTEM_OUT,,__GET_VAR(data__->TON0.Q,));
-  __SET_VAR(data__->,COOLING_OUT,,(__GET_VAR(data__->COOLING,) && __GET_VAR(data__->RUN_STATUS,)));
-  __SET_VAR(data__->,HEAT_OUT,,(__GET_VAR(data__->HEAT,) && __GET_VAR(data__->RUN_STATUS,)));
+  __SET_VAR(data__->R_TRIG3.,CLK,,__GET_VAR(data__->COOLING_BUTTON,));
+  R_TRIG_body__(&data__->R_TRIG3);
+  __SET_VAR(data__->,COOL_RUN,,(((__GET_VAR(data__->COOLING_OUT,) && __GET_VAR(data__->R_TRIG3.Q,)) && !(__GET_VAR(data__->STOP_STATUS,))) && __GET_VAR(data__->RUN_STATUS,)));
+  __SET_VAR(data__->R_TRIG4.,CLK,,__GET_VAR(data__->COOLING_BUTTON,));
+  R_TRIG_body__(&data__->R_TRIG4);
+  __SET_VAR(data__->,COOLING_OUT,,(!(__GET_VAR(data__->COOL_RUN,)) && ((((!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->COOLING_OUT,)) && !(__GET_VAR(data__->STOP_STATUS,))) && __GET_VAR(data__->RUN_STATUS,)) || (((!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->R_TRIG4.Q,)) && !(__GET_VAR(data__->STOP_STATUS,))) && __GET_VAR(data__->RUN_STATUS,)))));
+  __SET_VAR(data__->F_TRIG2.,CLK,,__GET_VAR(data__->COOLING_BUTTON,));
+  F_TRIG_body__(&data__->F_TRIG2);
+  if (((__GET_VAR(data__->F_TRIG2.Q,) && !(__GET_VAR(data__->STOP_STATUS,))) && __GET_VAR(data__->RUN_STATUS,))) {
+    __SET_VAR(data__->,COOL_RUN,,__BOOL_LITERAL(FALSE));
+  };
+  __SET_VAR(data__->R_TRIG5.,CLK,,__GET_VAR(data__->HEAT_BUTTON,));
+  R_TRIG_body__(&data__->R_TRIG5);
+  __SET_VAR(data__->,HEAT_RUN,,(((__GET_VAR(data__->HEAT_OUT,) && __GET_VAR(data__->R_TRIG5.Q,)) && !(__GET_VAR(data__->STOP_STATUS,))) && __GET_VAR(data__->RUN_STATUS,)));
+  __SET_VAR(data__->R_TRIG6.,CLK,,__GET_VAR(data__->HEAT_BUTTON,));
+  R_TRIG_body__(&data__->R_TRIG6);
+  __SET_VAR(data__->,HEAT_OUT,,(!(__GET_VAR(data__->HEAT_RUN,)) && ((((!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->HEAT_OUT,)) && !(__GET_VAR(data__->STOP_STATUS,))) && __GET_VAR(data__->RUN_STATUS,)) || (((!(__GET_VAR(data__->STOP_STATUS,)) && __GET_VAR(data__->R_TRIG6.Q,)) && !(__GET_VAR(data__->STOP_STATUS,))) && __GET_VAR(data__->RUN_STATUS,)))));
+  __SET_VAR(data__->F_TRIG3.,CLK,,__GET_VAR(data__->HEAT_BUTTON,));
+  F_TRIG_body__(&data__->F_TRIG3);
+  if (((__GET_VAR(data__->F_TRIG3.Q,) && !(__GET_VAR(data__->STOP_STATUS,))) && __GET_VAR(data__->RUN_STATUS,))) {
+    __SET_VAR(data__->,HEAT_RUN,,__BOOL_LITERAL(FALSE));
+  };
 
   goto __end;
 
