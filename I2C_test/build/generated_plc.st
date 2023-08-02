@@ -1,0 +1,21 @@
+PROGRAM program0
+  VAR
+    T0 : REAL;
+    add_slave : INT := 67;
+    SCK_PIN : INT := 22;
+    SDA_PIN : INT := 21;
+    I2C_THREMO_4_OUT0 : I2C_THREMO_4_OUT;
+  END_VAR
+
+  I2C_THREMO_4_OUT0(ADDR_SLAVE := add_slave, SCK_PIN := SCK_PIN, SDA_PIN := SDA_PIN);
+  T0 := I2C_THREMO_4_OUT0.OUT_0;
+END_PROGRAM
+
+
+CONFIGURATION Config0
+
+  RESOURCE Res0 ON PLC
+    TASK task0(INTERVAL := T#20ms,PRIORITY := 0);
+    PROGRAM instance0 WITH task0 : program0;
+  END_RESOURCE
+END_CONFIGURATION

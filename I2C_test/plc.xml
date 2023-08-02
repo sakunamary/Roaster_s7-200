@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='utf-8'?>
+<project xmlns:ns1="http://www.plcopen.org/xml/tc6_0201" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.plcopen.org/xml/tc6_0201">
+  <fileHeader companyName="Unknown" productName="Unnamed" productVersion="1" creationDateTime="2023-08-01T21:16:32"/>
+  <contentHeader name="Unnamed" modificationDateTime="2023-08-03T07:02:06">
+    <coordinateInfo>
+      <fbd>
+        <scaling x="10" y="10"/>
+      </fbd>
+      <ld>
+        <scaling x="10" y="10"/>
+      </ld>
+      <sfc>
+        <scaling x="10" y="10"/>
+      </sfc>
+    </coordinateInfo>
+  </contentHeader>
+  <types>
+    <dataTypes/>
+    <pous>
+      <pou name="main" pouType="program">
+        <interface/>
+        <body>
+          <LD/>
+        </body>
+      </pou>
+      <pou name="get_temp" pouType="program">
+        <body>
+          <LD/>
+        </body>
+      </pou>
+    </pous>
+  </types>
+  <instances>
+    <configurations>
+      <configuration name="Config0">
+        <resource name="Res0">
+          <task name="task0" priority="0" interval="T#20ms">
+            <pouInstance name="instance0" typeName="main"/>
+            <pouInstance name="instance1" typeName="get_temp"/>
+          </task>
+          <task name="task1" priority="1" interval="T#1000ms"/>
+          <globalVars>
+            <variable name="T0">
+              <type>
+                <REAL/>
+              </type>
+            </variable>
+            <variable name="SCK_PIN">
+              <type>
+                <INT/>
+              </type>
+              <initialValue>
+                <simpleValue value="22"/>
+              </initialValue>
+            </variable>
+            <variable name="SDA_PIN">
+              <type>
+                <INT/>
+              </type>
+              <initialValue>
+                <simpleValue value="21"/>
+              </initialValue>
+            </variable>
+          </globalVars>
+        </resource>
+      </configuration>
+    </configurations>
+  </instances>
+</project>
