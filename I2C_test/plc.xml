@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <project xmlns:ns1="http://www.plcopen.org/xml/tc6_0201" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.plcopen.org/xml/tc6_0201">
   <fileHeader companyName="Unknown" productName="Unnamed" productVersion="1" creationDateTime="2023-08-01T21:16:32"/>
-  <contentHeader name="Unnamed" modificationDateTime="2023-08-03T14:07:25">
+  <contentHeader name="Unnamed" modificationDateTime="2023-08-18T12:10:35">
     <coordinateInfo>
       <fbd>
         <scaling x="10" y="10"/>
@@ -93,11 +93,17 @@
               <type>
                 <INT/>
               </type>
+              <initialValue>
+                <simpleValue value="NODE_PIN_D5"/>
+              </initialValue>
             </variable>
             <variable name="sda">
               <type>
                 <INT/>
               </type>
+              <initialValue>
+                <simpleValue value="NODE_PIN_D4"/>
+              </initialValue>
             </variable>
             <variable name="temp">
               <type>
@@ -232,7 +238,7 @@
                 <INT/>
               </type>
               <initialValue>
-                <simpleValue value="22"/>
+                <simpleValue value="NODE_PIN_D5"/>
               </initialValue>
             </variable>
             <variable name="SDA_PIN">
@@ -240,8 +246,13 @@
                 <INT/>
               </type>
               <initialValue>
-                <simpleValue value="21"/>
+                <simpleValue value="NODE_PIN_D4"/>
               </initialValue>
+            </variable>
+            <variable name="RH0">
+              <type>
+                <REAL/>
+              </type>
             </variable>
           </globalVars>
         </resource>
