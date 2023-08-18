@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <project xmlns:ns1="http://www.plcopen.org/xml/tc6_0201" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.plcopen.org/xml/tc6_0201">
   <fileHeader companyName="Unknown" productName="Unnamed" productVersion="1" creationDateTime="2023-08-01T21:16:32"/>
-  <contentHeader name="Unnamed" modificationDateTime="2023-08-18T12:10:35">
+  <contentHeader name="Unnamed" modificationDateTime="2023-08-18T14:09:01">
     <coordinateInfo>
       <fbd>
         <scaling x="10" y="10"/>
@@ -20,14 +20,21 @@
       <pou name="main" pouType="program">
         <interface>
           <localVars>
-            <variable name="in">
+            <variable name="in" address="%IX0.2">
               <type>
                 <BOOL/>
               </type>
             </variable>
-            <variable name="out">
+            <variable name="out" address="%QX0.2">
               <type>
                 <BOOL/>
+              </type>
+            </variable>
+          </localVars>
+          <localVars>
+            <variable name="I2C_OLED0">
+              <type>
+                <derived name="I2C_OLED"/>
               </type>
             </variable>
           </localVars>
@@ -40,7 +47,7 @@
                 <relPosition x="10" y="20"/>
               </connectionPointOut>
             </leftPowerRail>
-            <contact localId="2" height="20" width="20" negated="false">
+            <contact localId="2" height="20" width="21" negated="false">
               <position x="470" y="90"/>
               <connectionPointIn>
                 <relPosition x="0" y="10"/>
@@ -50,34 +57,61 @@
                 </connection>
               </connectionPointIn>
               <connectionPointOut>
-                <relPosition x="20" y="10"/>
+                <relPosition x="21" y="10"/>
               </connectionPointOut>
               <variable>in</variable>
             </contact>
-            <coil localId="3" height="20" width="20" negated="false">
-              <position x="648" y="90"/>
+            <coil localId="3" height="20" width="21" negated="false">
+              <position x="790" y="90"/>
               <connectionPointIn>
                 <relPosition x="0" y="10"/>
                 <connection refLocalId="2">
-                  <position x="648" y="100"/>
-                  <position x="490" y="100"/>
+                  <position x="790" y="100"/>
+                  <position x="491" y="100"/>
                 </connection>
               </connectionPointIn>
               <connectionPointOut>
-                <relPosition x="20" y="10"/>
+                <relPosition x="21" y="10"/>
               </connectionPointOut>
               <variable>out</variable>
             </coil>
             <rightPowerRail localId="4" height="40" width="10">
-              <position x="748" y="80"/>
+              <position x="950" y="80"/>
               <connectionPointIn>
                 <relPosition x="0" y="20"/>
                 <connection refLocalId="3">
-                  <position x="748" y="100"/>
-                  <position x="668" y="100"/>
+                  <position x="950" y="100"/>
+                  <position x="811" y="100"/>
                 </connection>
               </connectionPointIn>
             </rightPowerRail>
+            <block localId="5" typeName="I2C_OLED" instanceName="I2C_OLED0" height="100" width="80">
+              <position x="530" y="280"/>
+              <inputVariables>
+                <variable formalParameter="LINE1">
+                  <connectionPointIn>
+                    <relPosition x="0" y="30"/>
+                  </connectionPointIn>
+                </variable>
+                <variable formalParameter="LINE2">
+                  <connectionPointIn>
+                    <relPosition x="0" y="50"/>
+                  </connectionPointIn>
+                </variable>
+                <variable formalParameter="LINE3">
+                  <connectionPointIn>
+                    <relPosition x="0" y="70"/>
+                  </connectionPointIn>
+                </variable>
+                <variable formalParameter="LINE4">
+                  <connectionPointIn>
+                    <relPosition x="0" y="90"/>
+                  </connectionPointIn>
+                </variable>
+              </inputVariables>
+              <inOutVariables/>
+              <outputVariables/>
+            </block>
           </LD>
         </body>
       </pou>
@@ -94,7 +128,7 @@
                 <INT/>
               </type>
               <initialValue>
-                <simpleValue value="NODE_PIN_D5"/>
+                <simpleValue value="5"/>
               </initialValue>
             </variable>
             <variable name="sda">
@@ -102,10 +136,15 @@
                 <INT/>
               </type>
               <initialValue>
-                <simpleValue value="NODE_PIN_D4"/>
+                <simpleValue value="4"/>
               </initialValue>
             </variable>
             <variable name="temp">
+              <type>
+                <REAL/>
+              </type>
+            </variable>
+            <variable name="RH0">
               <type>
                 <REAL/>
               </type>
@@ -133,9 +172,7 @@
                     <relPosition x="0" y="50"/>
                     <connection refLocalId="4">
                       <position x="500" y="200"/>
-                      <position x="445" y="200"/>
-                      <position x="445" y="210"/>
-                      <position x="390" y="210"/>
+                      <position x="390" y="200"/>
                     </connection>
                   </connectionPointIn>
                 </variable>
@@ -145,8 +182,8 @@
                     <connection refLocalId="5">
                       <position x="500" y="220"/>
                       <position x="445" y="220"/>
-                      <position x="445" y="250"/>
-                      <position x="390" y="250"/>
+                      <position x="445" y="240"/>
+                      <position x="390" y="240"/>
                     </connection>
                   </connectionPointIn>
                 </variable>
@@ -203,15 +240,104 @@
               <expression>sda</expression>
             </inVariable>
             <outVariable localId="6" height="30" width="50" negated="false">
-              <position x="720" y="180"/>
+              <position x="720" y="170"/>
               <connectionPointIn>
                 <relPosition x="0" y="20"/>
                 <connection refLocalId="1" formalParameter="TEMP">
-                  <position x="720" y="200"/>
+                  <position x="720" y="190"/>
+                  <position x="665" y="190"/>
+                  <position x="665" y="200"/>
                   <position x="610" y="200"/>
                 </connection>
               </connectionPointIn>
               <expression>temp</expression>
+            </outVariable>
+            <outVariable localId="7" height="30" width="40" negated="false">
+              <position x="720" y="220"/>
+              <connectionPointIn>
+                <relPosition x="0" y="20"/>
+                <connection refLocalId="1" formalParameter="RH">
+                  <position x="720" y="240"/>
+                  <position x="665" y="240"/>
+                  <position x="665" y="220"/>
+                  <position x="610" y="220"/>
+                </connection>
+              </connectionPointIn>
+              <expression>RH0</expression>
+            </outVariable>
+            <leftPowerRail localId="9" height="40" width="10">
+              <position x="330" y="310"/>
+              <connectionPointOut formalParameter="">
+                <relPosition x="10" y="20"/>
+              </connectionPointOut>
+            </leftPowerRail>
+            <block localId="10" typeName="REAL_TO_STRING" height="60" width="130">
+              <position x="470" y="300"/>
+              <inputVariables>
+                <variable formalParameter="EN">
+                  <connectionPointIn>
+                    <relPosition x="0" y="30"/>
+                    <connection refLocalId="9">
+                      <position x="470" y="330"/>
+                      <position x="340" y="330"/>
+                    </connection>
+                  </connectionPointIn>
+                </variable>
+                <variable formalParameter="IN">
+                  <connectionPointIn>
+                    <relPosition x="0" y="50"/>
+                    <connection refLocalId="12">
+                      <position x="470" y="350"/>
+                      <position x="440" y="350"/>
+                      <position x="440" y="370"/>
+                      <position x="410" y="370"/>
+                    </connection>
+                  </connectionPointIn>
+                </variable>
+              </inputVariables>
+              <inOutVariables/>
+              <outputVariables>
+                <variable formalParameter="ENO">
+                  <connectionPointOut>
+                    <relPosition x="130" y="30"/>
+                  </connectionPointOut>
+                </variable>
+                <variable formalParameter="OUT">
+                  <connectionPointOut>
+                    <relPosition x="130" y="50"/>
+                  </connectionPointOut>
+                </variable>
+              </outputVariables>
+            </block>
+            <rightPowerRail localId="11" height="40" width="10">
+              <position x="790" y="310"/>
+              <connectionPointIn>
+                <relPosition x="0" y="20"/>
+                <connection refLocalId="10" formalParameter="ENO">
+                  <position x="790" y="330"/>
+                  <position x="600" y="330"/>
+                </connection>
+              </connectionPointIn>
+            </rightPowerRail>
+            <inVariable localId="12" height="30" width="50" negated="false">
+              <position x="360" y="350"/>
+              <connectionPointOut>
+                <relPosition x="50" y="20"/>
+              </connectionPointOut>
+              <expression>temp</expression>
+            </inVariable>
+            <outVariable localId="13" height="30" width="50" negated="false">
+              <position x="700" y="340"/>
+              <connectionPointIn>
+                <relPosition x="0" y="20"/>
+                <connection refLocalId="10" formalParameter="OUT">
+                  <position x="700" y="360"/>
+                  <position x="650" y="360"/>
+                  <position x="650" y="350"/>
+                  <position x="600" y="350"/>
+                </connection>
+              </connectionPointIn>
+              <expression>line2</expression>
             </outVariable>
           </LD>
         </body>
@@ -224,34 +350,14 @@
         <resource name="Res0">
           <task name="task0" priority="0" interval="T#20ms">
             <pouInstance name="instance0" typeName="main"/>
+          </task>
+          <task name="task1" priority="1" interval="T#1000ms">
             <pouInstance name="instance1" typeName="get_temp"/>
           </task>
-          <task name="task1" priority="1" interval="T#1000ms"/>
           <globalVars>
-            <variable name="T0">
+            <variable name="line1">
               <type>
-                <REAL/>
-              </type>
-            </variable>
-            <variable name="SCK_PIN">
-              <type>
-                <INT/>
-              </type>
-              <initialValue>
-                <simpleValue value="NODE_PIN_D5"/>
-              </initialValue>
-            </variable>
-            <variable name="SDA_PIN">
-              <type>
-                <INT/>
-              </type>
-              <initialValue>
-                <simpleValue value="NODE_PIN_D4"/>
-              </initialValue>
-            </variable>
-            <variable name="RH0">
-              <type>
-                <REAL/>
+                <string/>
               </type>
             </variable>
           </globalVars>

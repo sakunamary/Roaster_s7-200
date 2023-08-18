@@ -205,6 +205,7 @@ void GET_TEMP_init__(GET_TEMP *data__, BOOL retain) {
   __INIT_VAR(data__->SCK,5,retain)
   __INIT_VAR(data__->SDA,4,retain)
   __INIT_VAR(data__->TEMP,0,retain)
+  __INIT_VAR(data__->RH0,0,retain)
 }
 
 // Code part
@@ -217,6 +218,9 @@ void GET_TEMP_body__(GET_TEMP *data__) {
   I2C_AHT20_body__(&data__->I2C_AHT200);
   if (__GET_VAR(data__->I2C_AHT200.ENO,)) {
     __SET_VAR(data__->,TEMP,,__GET_VAR(data__->I2C_AHT200.TEMP,));
+  };
+  if (__GET_VAR(data__->I2C_AHT200.ENO,)) {
+    __SET_VAR(data__->,RH0,,__GET_VAR(data__->I2C_AHT200.RH,));
   };
 
   goto __end;

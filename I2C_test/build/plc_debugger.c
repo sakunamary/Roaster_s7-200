@@ -87,9 +87,6 @@ extern GET_TEMP RES0__INSTANCE1;
 /***
  * Declare global variables from resources and conf 
  **/
-extern __IEC_REAL_t RES0__T0;
-extern __IEC_INT_t RES0__SCK_PIN;
-extern __IEC_INT_t RES0__SDA_PIN;
 extern       MAIN   RES0__INSTANCE0;
 extern       GET_TEMP   RES0__INSTANCE1;
 
@@ -99,9 +96,6 @@ typedef const struct {
 } dbgvardsc_t;
 
 static const dbgvardsc_t dbgvardsc[] = {
-{&(RES0__T0), REAL_ENUM},
-{&(RES0__SCK_PIN), INT_ENUM},
-{&(RES0__SDA_PIN), INT_ENUM},
 {&(RES0__INSTANCE0.IN), BOOL_ENUM},
 {&(RES0__INSTANCE0.OUT), BOOL_ENUM},
 {&(RES0__INSTANCE1.I2C_AHT200.EN), BOOL_ENUM},
@@ -112,7 +106,8 @@ static const dbgvardsc_t dbgvardsc[] = {
 {&(RES0__INSTANCE1.I2C_AHT200.RH), REAL_ENUM},
 {&(RES0__INSTANCE1.SCK), INT_ENUM},
 {&(RES0__INSTANCE1.SDA), INT_ENUM},
-{&(RES0__INSTANCE1.TEMP), REAL_ENUM}
+{&(RES0__INSTANCE1.TEMP), REAL_ENUM},
+{&(RES0__INSTANCE1.RH0), REAL_ENUM}
 };
 
 static const dbgvardsc_index_t retain_list[] = {

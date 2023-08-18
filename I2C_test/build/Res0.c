@@ -13,9 +13,6 @@ extern unsigned long long common_ticktime__;
 #include "POUS.h"
 
 #include "Config0.h"
-__DECLARE_GLOBAL(REAL,RES0,T0)
-__DECLARE_GLOBAL(INT,RES0,SCK_PIN)
-__DECLARE_GLOBAL(INT,RES0,SDA_PIN)
 
 #include "POUS.c"
 
@@ -29,9 +26,7 @@ GET_TEMP RES0__INSTANCE1;
 void RES0_init__(void) {
   BOOL retain;
   retain = 0;
-  __INIT_GLOBAL(REAL,T0,__INITIAL_VALUE(0),retain)
-  __INIT_GLOBAL(INT,SCK_PIN,__INITIAL_VALUE(22),retain)
-  __INIT_GLOBAL(INT,SDA_PIN,__INITIAL_VALUE(21),retain)
+  
   TASK0 = __BOOL_LITERAL(FALSE);
   TASK1 = __BOOL_LITERAL(FALSE);
   MAIN_init__(&INSTANCE0,retain);
@@ -44,7 +39,7 @@ void RES0_run__(unsigned long tick) {
   if (TASK0) {
     MAIN_body__(&INSTANCE0);
   }
-  if (TASK0) {
+  if (TASK1) {
     GET_TEMP_body__(&INSTANCE1);
   }
 }
